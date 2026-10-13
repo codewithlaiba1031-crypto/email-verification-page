@@ -104,13 +104,19 @@
                 window.location.pathname
             );
 
-        } catch (error) {
-            icon.textContent = "⚠️";
-            title.textContent = "Verification failed";
-            message.textContent =
-                "This link may have expired or already been used. Please request a new verification email.";
-            console.error("Verification error:", error);
-        }
+        
+} catch (error) {
+    console.error("Verification error:", error);
+    console.error("Error code:", error.code);
+    console.error("Error type:", error.type);
+    console.error("HTTP status:", error.response?.code);
+
+    icon.textContent = "⚠️";
+    title.textContent = "Verification failed";
+
+    message.textContent =
+        `Error: ${error.message || "Unknown error"}`;
+}
     }
 
     verifyEmail();
