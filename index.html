@@ -87,10 +87,7 @@
         }
 
         try {
-            await account.updateVerification({
-                userId: userId,
-                secret: secret
-            });
+        await account.updateVerification(userId, secret);
 
             icon.textContent = "✅";
             title.textContent = "Email verified!";
