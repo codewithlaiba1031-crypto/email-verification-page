@@ -1,0 +1,60 @@
+---
+import "../styles/global.css";
+export const prerender = false;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Sign In Failed - Chatbot</title>
+  </head>
+  <body
+    class="min-h-screen bg-[#fcfcfc] flex items-center justify-center p-6 font-sans"
+  >
+    <div
+      class="w-full max-w-[440px] bg-white rounded-4xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 text-center"
+    >
+      <div
+        class="mb-6 h-16 w-16 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600"
+      >
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </div>
+
+      <h1
+        class="text-2xl sm:text-3xl font-bold text-[#1a1a1a] mb-3 tracking-tight"
+      >
+        Sign in failed
+      </h1>
+
+      <p class="text-[#666] text-[15px] leading-relaxed">
+        Returning you to Chatbot.
+      </p>
+    </div>
+
+    <script>
+      const callbackUrl = new URL(
+        "appwrite-callback-6a391bc3001d892628cb://oauth-failure"
+      );
+      callbackUrl.search = window.location.search;
+      callbackUrl.hash = window.location.hash;
+
+      setTimeout(() => {
+        window.location.href = callbackUrl.toString();
+      }, 1800);
+    </script>
+  </body>
+</html>

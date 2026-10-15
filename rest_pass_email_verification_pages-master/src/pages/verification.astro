@@ -1,0 +1,145 @@
+---
+import "../styles/global.css";
+export const prerender = false;
+
+const url = Astro.url;
+const userId = url.searchParams.get("userId");
+const secret = url.searchParams.get("secret");
+
+const hasParams = Boolean(userId && secret);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Verify Account - Chatbot</title>
+  </head>
+  <body
+    class="min-h-screen bg-[#fcfcfc] flex items-center justify-center p-6 font-sans"
+  >
+    <div
+      class="w-full max-w-[440px] bg-white rounded-4xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 text-center"
+    >
+      {!hasParams ? (
+        <div
+          class="bg-red-50 border border-red-100 text-red-600 rounded-xl p-4 text-sm flex items-center gap-3 mb-6 text-left"
+        >
+          <svg
+            class="shrink-0"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span class="font-medium">Invalid or expired verification link.</span>
+        </div>
+      ) : (
+        <div id="statusContainer" class="flex flex-col items-center">
+          <!-- Loading State (Default - visible) -->
+          <div id="loadingState">
+            <div class="mb-6 relative flex items-center justify-center">
+               <div class="h-16 w-16 rounded-full border-4 border-gray-100"></div>
+               <div class="absolute h-16 w-16 rounded-full border-4 border-black border-t-transparent animate-spin"></div>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-[#1a1a1a] mb-3 tracking-tight">
+              Verifying...
+            </h1>
+            <p class="text-[#666] text-[15px] leading-relaxed">
+              Please wait while we verify your account.
+            </p>
+          </div>
+
+          <!-- Success State (Initially hidden with inline style) -->
+          <div id="successState" style="display: none;">
+            <div class="mb-6 h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto text-green-600">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-[#1a1a1a] mb-3 tracking-tight">
+              Verified!
+            </h1>
+            <p class="text-[#666] text-[15px] leading-relaxed">
+              Your account has been successfully verified. Redirecting you...
+            </p>
+          </div>
+
+          <!-- Error State (Initially hidden with inline style) -->
+          <div id="errorState" style="display: none;">
+             <div class="mb-6 h-16 w-16 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-[#1a1a1a] mb-3 tracking-tight">
+              Verification Failed
+            </h1>
+            <p id="errorMsg" class="text-red-500 text-[15px] leading-relaxed font-medium">
+              Something went wrong.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {
+      hasParams && (
+        <script type="module">
+          import {
+            Client,
+            Account,
+          } from "https://cdn.jsdelivr.net/npm/appwrite@17.0.0/+esm";
+
+          const client = new Client()
+            .setEndpoint("https://appwrite.appsqueeze.com/v1")
+            .setProject("6a391bc3001d892628cb");
+
+          const account = new Account(client);
+
+          const params = new URLSearchParams(window.location.search);
+          const userId = params.get("userId");
+          const secret = params.get("secret");
+
+          const loadingState = document.getElementById("loadingState");
+          const successState = document.getElementById("successState");
+          const errorState = document.getElementById("errorState");
+          const errorMsg = document.getElementById("errorMsg");
+
+          async function verify() {
+            try {
+              await account.updateVerification(userId, secret);
+
+              // Show success
+              loadingState.style.display = "none";
+              successState.style.display = "block";
+
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 2000);
+            } catch (err) {
+              console.error(err);
+              // Show error
+              loadingState.style.display = "none";
+              errorState.style.display = "block";
+              errorMsg.textContent = err.message || "Failed to verify account.";
+            }
+          }
+
+          // Start verification on load
+          verify();
+        </script>
+      )
+    }
+  </body>
+</html>
