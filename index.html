@@ -1,1 +1,119 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Image Generator - Email Verification</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5fa;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            margin: 20px;
+            border-radius: 18px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 5px 25px #00000012;
+        }
+
+        .icon {
+            font-size: 48px;
+        }
+
+        h1 {
+            color: #202124;
+        }
+
+        p {
+            color: #626776;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon" id="icon">✉️</div>
+
+        <h1 id="title">Verifying your email...</h1>
+
+        <p id="message">
+            Please wait while we verify your email address.
+        </p>
+    </div>
+
+    <script type="module">
+        import {
+            Client,
+            Account
+        } from "https://cdn.jsdelivr.net/npm/appwrite@17.0.0/+esm";
+
+        const client = new Client()
+            .setEndpoint("https://appwrite.appsqueeze.com/v1")
+            .setProject("6a84330f0034b3a37e91");
+
+        const account = new Account(client);
+
+        const title = document.getElementById("title");
+        const message = document.getElementById("message");
+        const icon = document.getElementById("icon");
+
+        async function verifyEmail() {
+            const params = new URLSearchParams(
+                window.location.search
+            );
+
+            const userId = params.get("userId");
+            const secret = params.get("secret");
+
+            if (!userId || !secret) {
+                icon.textContent = "⚠️";
+                title.textContent = "Invalid verification link";
+                message.textContent =
+                    "The verification link is missing required information. Please request a new email.";
+                return;
+            }
+
+            try {
+                await account.updateVerification({
+                    userId: userId,
+                    secret: secret
+                });
+
+                icon.textContent = "✅";
+                title.textContent = "Email verified!";
+                message.textContent =
+                    "Your email has been verified successfully. You can now return to the Image Generator app.";
+
+                // Remove verification parameters from the address bar.
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    window.location.pathname
+                );
+
+    } catch (error) {
+    console.error("Verification error:", error);
+
+    title.textContent = "Verification failed";
+    message.textContent =
+        `${error.message} (Code: ${error.code})`;
+}
+        }
+
+        verifyEmail();
+    </script>
+</body>
+</html>
